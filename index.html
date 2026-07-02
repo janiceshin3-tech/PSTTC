@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알록달록 꿈나무 웹 교구 놀이터</title>
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 구글 폰트 (동글동글한 느낌의 한글 및 영문 폰트) -->
+    <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Gaegu:wght@400;700&family=Comfortaa:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Gaegu', 'Gamja Flower', cursive, sans-serif;
+            background-color: #FFFDF0; /* 따뜻한 크림 크림색 */
+            overflow-x: hidden;
+            user-select: none;
+        }
+        
+        /* 폰트 지정 수동 보강 */
+        .title-font {
+            font-family: 'Gamja Flower', cursive;
+        }
+        
+        .number-font {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        /* 둥실둥실 구름 애니메이션 */
+        @keyframes floatCloud {
+            0% { transform: translateX(-10%) translateY(0px); }
+            50% { transform: translateX(5%) translateY(-10px); }
+            100% { transform: translateX(-10%) translateY(0px); }
+        }
+
+        .cloud-animate-1 {
+            animation: floatCloud 20s ease-in-out infinite;
+        }
+        .cloud-animate-2 {
+            animation: floatCloud 28s ease-in-out infinite reverse;
+        }
+
+        /* 통통 튀는 애니메이션 */
+        @keyframes bouncy {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bouncy-hover:hover {
+            animation: bouncy 0.6s ease infinite;
+        }
+
+        /* 모달 스케일 애니메이션 */
+        .modal-active {
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes modalPop {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 드래그 가능 아이템 전용 스타일 */
+        .draggable {
+            touch-action: none;
+            cursor: grab;
+        }
+        .draggable:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative">
+
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <!-- 둥실 구름 1 -->
+        <svg class="absolute top-10 left-[10%] w-48 h-auto opacity-70 cloud-animate-1" viewBox="0 0 100 60" fill="#FFFFFF">
+            <path d="M20,40 C15,40 10,35 10,30 C10,24 16,20 22,20 C24,12 34,5 45,5 C56,5 64,13 66,20 C72,20 78,24 80,30 C82,37 76,43 70,44 C70,44 20,44 20,40 Z" />
+        </svg>
+        <!-- 둥실 구름 2 -->
+        <svg class="absolute top-36 right-[15%] w-60 h-auto opacity-60 cloud-animate-2" viewBox="0 0 100 60" fill="#FFFFFF">
+            <path d="M20,40 C15,40 10,35 10,30 C10,24 16,20 22,20 C24,12 34,5 45,5 C56,5 64,13 66,20 C72,20 78,24 80,30 C82,37 76,43 70,44 C70,44 20,44 20,40 Z" />
+        </svg>
+        <!-- 귀여운 미니 태양 -->
+        <div class="absolute top-5 right-5 w-16 h-16 bg-amber-400 rounded-full flex items-center justify-center shadow-lg border-4 border-white text-2xl animate-spin" style="animation-duration: 40s;">☀️</div>
+    </div>
+
+    <!-- 메인 대시보드 화면 -->
+    <main id="mainDashboard" class="container mx-auto px-4 py-8 z-10 max-w-5xl flex-grow">
+        <!-- 상단 헤더 타이틀 -->
+        <div class="text-center mb-10 mt-6">
+            <div class="inline-block bg-white px-6 py-2 rounded-full shadow-md text-amber-500 font-bold text-lg mb-3 tracking-wide border-2 border-amber-200">
+                🌱 꿈나무 모바일 교구 교실
+            </div>
+            <h1 class="title-font text-5xl md:text-6xl text-orange-500 font-bold tracking-tight drop-shadow-[0_2px_2px_rgba(255,255,255,0.8)]">
+                알록달록 웹 교구 놀이터
+            </h1>
+            <p class="text-xl md:text-2xl text-emerald-600 mt-2 font-medium">
+                우리가 직접 누르고 신나게 놀이하며 배워요! ✨
+            </p>
+        </div>
+
+        <!-- 4대 교구 카드 섹션 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2">
+            
+            <!-- 카드 1: 숨은 그림 찾기 -->
+            <div onclick="window.open('01/index.html', '_blank')" class="card bouncy-hover bg-sky-50 border-4 border-sky-300 rounded-[30px] p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
+                <div class="w-24 h-24 bg-sky-100 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                    🔍
+                </div>
+                <h3 class="text-2xl font-bold text-sky-600 mb-2">두근두근 숨은그림찾기</h3>
+                <p class="text-gray-600 text-lg leading-snug">그림 속에 쏙쏙 숨어있는 멋진 비밀 물건들을 찾아보아요!</p>
+                <button class="mt-5 px-6 py-2 bg-sky-400 hover:bg-sky-500 text-white rounded-full font-bold shadow-md transition-all text-lg">
+                    놀러가기 ➔
+                </button>
+            </div>
+
+            <!-- 카드 2: 낱말 맞추기 -->
+            <div onclick="openTool('word')" class="card bouncy-hover bg-amber-50 border-4 border-amber-300 rounded-[30px] p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
+                <div class="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                    🦁
+                </div>
+                <h3 class="text-2xl font-bold text-amber-600 mb-2">동물 낱말 맞추기</h3>
+                <p class="text-gray-600 text-lg leading-snug">그림이랑 맞는 동물의 이름을 쏙쏙 맞춰 완성해 보아요!</p>
+                <button class="mt-5 px-6 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-full font-bold shadow-md transition-all text-lg">
+                    놀러가기 ➔
+                </button>
+            </div>
+
+            <!-- 카드 3: 도토리 세기 -->
+            <div onclick="openTool('acorn')" class="card bouncy-hover bg-emerald-50 border-4 border-emerald-300 rounded-[30px] p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
+                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                    🐿️
+                </div>
+                <h3 class="text-2xl font-bold text-emerald-600 mb-2">도토리 쏙쏙 세기</h3>
+                <p class="text-gray-600 text-lg leading-snug">다람쥐 바구니 속에 도토리를 가득 담아 세어 보아요!</p>
+                <button class="mt-5 px-6 py-2 bg-emerald-400 hover:bg-emerald-500 text-white rounded-full font-bold shadow-md transition-all text-lg">
+                    놀러가기 ➔
+                </button>
+            </div>
+
+            <!-- 카드 4: 색깔 믹서기 -->
+            <div onclick="openTool('color')" class="card bouncy-hover bg-purple-50 border-4 border-purple-300 rounded-[30px] p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
+                <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                    🎨
+                </div>
+                <h3 class="text-2xl font-bold text-purple-600 mb-2">조물조물 색깔 믹서</h3>
+                <p class="text-gray-600 text-lg leading-snug">마법 물감들을 마구 섞어서 예쁜 새 색깔을 창조해 봐요!</p>
+                <button class="mt-5 px-6 py-2 bg-purple-400 hover:bg-purple-500 text-white rounded-full font-bold shadow-md transition-all text-lg">
+                    놀러가기 ➔
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 하단 선생님 안내 및 가이드 -->
+        <div class="mt-12 bg-white/80 backdrop-blur rounded-[25px] p-6 border-2 border-dashed border-amber-300 max-w-2xl mx-auto shadow-sm flex items-start gap-4">
+            <div class="text-3xl">💡</div>
+            <div>
+                <h4 class="text-xl font-bold text-gray-800">선생님 & 부모님 가이드</h4>
+                <p class="text-gray-600 text-lg mt-1 leading-relaxed">
+                    이 교구들은 아이들이 조작하기 쉬운 심플한 난이도로 구성되어 있습니다. 태블릿 PC나 터치스크린 환경에서 사용 시 더욱 실감나게 체험할 수 있으며, 오디오 기능을 켜시면 더 풍성하게 즐기실 수 있습니다.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 웹 교구 인터랙티브 스페이스 (기본 숨김) -->
+    <div id="toolWorkspace" class="hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="toolContainer" class="modal-active bg-white w-full max-w-3xl rounded-[35px] shadow-2xl overflow-hidden border-4 flex flex-col" style="max-height: 90vh;">
+            
+            <!-- 도구 상단 바 -->
+            <div id="toolHeader" class="px-6 py-4 flex items-center justify-between text-white border-b-4">
+                <div class="flex items-center gap-3">
+                    <span id="toolIcon" class="text-3xl">⭐</span>
+                    <h2 id="toolTitle" class="title-font text-3xl font-bold">교구 놀이</h2>
+                </div>
+                <!-- 닫기 / 돌아가기 버튼 -->
+                <button onclick="closeTool()" class="bg-white/20 hover:bg-white/40 text-white font-bold px-4 py-2 rounded-full border border-white/40 transition-all text-lg flex items-center gap-1">
+                    🏠 처음으로
+                </button>
+            </div>
+
+            <!-- 도구 실연 컨텐츠 윈도우 -->
+            <div class="p-6 overflow-y-auto bg-amber-50/50 flex-grow" style="min-height: 400px;">
+                
+                <!-- [도구 1: 쿵짝쿵짝 리듬 놀이] -->
+                <div id="rhythmPlayContent" class="hidden">
+                    <div class="text-center mb-6">
+                        <p class="text-xl text-stone-600">동물 패드를 탭하여 예쁜 소리를 울려보세요! 🎹</p>
+                    </div>
+                    <!-- 귀여운 패드 격자판 -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onclick="playSynth('cat')" class="bg-rose-100 hover:bg-rose-200 active:scale-95 border-4 border-rose-300 rounded-[25px] p-6 flex flex-col items-center justify-center shadow-md transition-all group">
+                            <span class="text-6xl group-hover:scale-110 transition-transform">🐱</span>
+                            <span class="text-rose-700 text-xl font-bold mt-3">야옹이</span>
+                        </button>
+                        <button onclick="playSynth('dog')" class="bg-amber-100 hover:bg-amber-200 active:scale-95 border-4 border-amber-300 rounded-[25px] p-6 flex flex-col items-center justify-center shadow-md transition-all group">
+                            <span class="text-6xl group-hover:scale-110 transition-transform">🐶</span>
+                            <span class="text-amber-700 text-xl font-bold mt-3">바둑이</span>
+                        </button>
+                        <button onclick="playSynth('frog')" class="bg-emerald-100 hover:bg-emerald-200 active:scale-95 border-4 border-emerald-300 rounded-[25px] p-6 flex flex-col items-center justify-center shadow-md transition-all group">
+                            <span class="text-6xl group-hover:scale-110 transition-transform">🐸</span>
+                            <span class="text-emerald-700 text-xl font-bold mt-3">개구리</span>
+                        </button>
+                        <button onclick="playSynth('duck')" class="bg-sky-100 hover:bg-sky-200 active:scale-95 border-4 border-sky-300 rounded-[25px] p-6 flex flex-col items-center justify-center shadow-md transition-all group">
+                            <span class="text-6xl group-hover:scale-110 transition-transform">🦆</span>
+                            <span class="text-sky-700 text-xl font-bold mt-3">오리야</span>
+                        </button>
+                    </div>
+
+                    <!-- 간이 드럼 및 실로폰 기능 추가 -->
+                    <div class="mt-8 bg-white rounded-2xl p-4 border-2 border-dashed border-rose-300">
+                        <h4 class="text-xl font-bold text-rose-500 mb-3 text-center">🌟 실로폰 건반을 두드려봐요!</h4>
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="playTone(261.63, 'C')" class="flex-1 py-8 bg-red-400 hover:bg-red-500 active:bg-red-600 text-white font-bold rounded-lg shadow-md border-b-8 border-red-600 text-lg">도</button>
+                            <button onclick="playTone(293.66, 'D')" class="flex-1 py-8 bg-orange-400 hover:bg-orange-500 active:bg-orange-600 text-white font-bold rounded-lg shadow-md border-b-8 border-orange-600 text-lg">레</button>
+                            <button onclick="playTone(329.63, 'E')" class="flex-1 py-8 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-white font-bold rounded-lg shadow-md border-b-8 border-yellow-600 text-lg">미</button>
+                            <button onclick="playTone(349.23, 'F')" class="flex-1 py-8 bg-green-400 hover:bg-green-500 active:bg-green-600 text-white font-bold rounded-lg shadow-md border-b-8 border-green-600 text-lg">파</button>
+                            <button onclick="playTone(392.00, 'G')" class="flex-1 py-8 bg-blue-400 hover:bg-blue-500 active:bg-blue-600 text-white font-bold rounded-lg shadow-md border-b-8 border-blue-600 text-lg">솔</button>
+                            <button onclick="playTone(440.00, 'A')" class="flex-1 py-8 bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 text-white font-bold rounded-lg shadow-md border-b-8 border-indigo-600 text-lg">라</button>
+                            <button onclick="playTone(493.88, 'B')" class="flex-1 py-8 bg-purple-400 hover:bg-purple-500 active:bg-purple-600 text-white font-bold rounded-lg shadow-md border-b-8 border-purple-600 text-lg">시</button>
+                            <button onclick="playTone(523.25, 'C2')" class="flex-1 py-8 bg-pink-400 hover:bg-pink-500 active:bg-pink-600 text-white font-bold rounded-lg shadow-md border-b-8 border-pink-600 text-lg">높은 도</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- [도구 2: 동물 낱말 맞추기] -->
+                <div id="wordMatchContent" class="hidden">
+                    <div class="text-center mb-4">
+                        <p class="text-xl text-stone-600">동물 그림을 먼저 누르고, 알맞은 한글 카드를 클릭해서 이어주세요! 🤝</p>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-around gap-8 mt-6">
+                        <!-- 그림 카드들 -->
+                        <div class="flex flex-row md:flex-col gap-4 justify-center" id="imageCardsContainer">
+                            <!-- JS를 통해 동적 생성 -->
+                        </div>
+                        
+                        <!-- 중간 상태 바 -->
+                        <div class="flex items-center justify-center">
+                            <div class="text-5xl animate-bounce text-amber-500" id="matchStatusArrow">👉</div>
+                        </div>
+
+                        <!-- 낱말 카드들 -->
+                        <div class="flex flex-row md:flex-col gap-4 justify-center" id="wordCardsContainer">
+                            <!-- JS를 통해 동적 생성 -->
+                        </div>
+                    </div>
+
+                    <!-- 스코어 표시 영역 -->
+                    <div class="mt-8 text-center">
+                        <div id="matchScoreText" class="text-2xl font-bold text-amber-600">성공한 맞춤: 0 / 3</div>
+                        <button onclick="initWordGame()" class="mt-3 px-6 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-full font-bold shadow-md text-lg">
+                            🔄 다른 동물로 다시하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- [도구 3: 도토리 세기] -->
+                <div id="acornCountContent" class="hidden relative">
+                    <div class="text-center mb-4">
+                        <p class="text-xl text-stone-600">도토리를 드래그해서 다람쥐의 바구니 안에 쏙 넣어주세요! 🐿️🌰</p>
+                    </div>
+
+                    <!-- 게임 보드 영역 -->
+                    <div class="relative w-full h-[320px] bg-sky-100 rounded-[25px] border-4 border-dashed border-emerald-300 overflow-hidden" id="gameBoard">
+                        
+                        <!-- 도토리 바구니 (목표 영역) -->
+                        <div id="basketArea" class="absolute bottom-4 right-10 w-44 h-44 flex flex-col items-center justify-center bg-amber-700/80 rounded-b-2xl rounded-t-[50%] border-4 border-amber-900 shadow-lg text-white">
+                            <span class="text-5xl animate-bounce">🐿️</span>
+                            <span class="font-bold text-xl mt-1">도토리 바구니</span>
+                            <div class="number-font text-3xl font-extrabold bg-white text-amber-800 px-3 py-0.5 rounded-full mt-1" id="acornCounter">
+                                0 개
+                            </div>
+                        </div>
+
+                        <!-- 흩어져 있는 도토리들 (드래그 가능) -->
+                        <div id="acornSpawnArea">
+                            <!-- JS를 통해 도토리들이 무작위 분포 생성됩니다 -->
+                        </div>
+
+                    </div>
+
+                    <!-- 컨트롤 -->
+                    <div class="mt-6 text-center">
+                        <button onclick="resetAcornGame()" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-bold rounded-full shadow-lg transition-transform hover:scale-105">
+                            🌰 도토리 가득 다시 뿌리기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- [도구 4: 색깔 믹서기] -->
+                <div id="colorMixerContent" class="hidden">
+                    <div class="text-center mb-6">
+                        <p class="text-xl text-stone-600">물감통을 눌러서 믹서기에 물감을 부어보세요! 신기한 혼합색 완성 🧪</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <!-- 물감 주입 버튼들 -->
+                        <div class="flex flex-row justify-around md:flex-col gap-4">
+                            <button onclick="addMixColor('red')" class="flex items-center gap-3 bg-red-100 hover:bg-red-200 border-4 border-red-400 p-4 rounded-2xl transition-all shadow-sm active:scale-95">
+                                <span class="w-10 h-10 rounded-full bg-red-500 border-2 border-white inline-block"></span>
+                                <span class="text-red-700 text-2xl font-bold">빨간 물감 넣기</span>
+                            </button>
+                            <button onclick="addMixColor('yellow')" class="flex items-center gap-3 bg-yellow-100 hover:bg-yellow-200 border-4 border-yellow-400 p-4 rounded-2xl transition-all shadow-sm active:scale-95">
+                                <span class="w-10 h-10 rounded-full bg-yellow-400 border-2 border-white inline-block"></span>
+                                <span class="text-yellow-700 text-2xl font-bold">노란 물감 넣기</span>
+                            </button>
+                            <button onclick="addMixColor('blue')" class="flex items-center gap-3 bg-blue-100 hover:bg-blue-200 border-4 border-blue-400 p-4 rounded-2xl transition-all shadow-sm active:scale-95">
+                                <span class="w-10 h-10 rounded-full bg-blue-500 border-2 border-white inline-block"></span>
+                                <span class="text-blue-700 text-2xl font-bold">파란 물감 넣기</span>
+                            </button>
+                        </div>
+
+                        <!-- 믹서기 비주얼 플라스크 -->
+                        <div class="bg-white p-6 rounded-3xl border-4 border-purple-200 shadow-inner flex flex-col items-center">
+                            <h4 class="text-xl font-bold text-purple-600 mb-2">🧪 색깔 마법 단지</h4>
+                            
+                            <!-- 플라스크 형상 -->
+                            <div class="relative w-44 h-52 bg-stone-100 border-8 border-stone-300 rounded-b-[40px] rounded-t-[15px] overflow-hidden flex flex-col-reverse justify-start">
+                                <!-- 담겨진 물감 채우기 시각화 -->
+                                <div id="flaskLiquid" class="w-full bg-stone-300 transition-all duration-500 ease-out" style="height: 15%;"></div>
+                                <!-- 내부에 추가된 물감 칩 표기 -->
+                                <div id="addedBubbles" class="absolute inset-0 flex flex-wrap content-center justify-center gap-2 p-4"></div>
+                            </div>
+
+                            <!-- 조합된 결과 텍스트 -->
+                            <div class="mt-4 text-center">
+                                <div class="text-gray-500 text-lg">조합된 색깔:</div>
+                                <div id="mixResultName" class="text-2xl font-black text-gray-800 mt-1">텅 비었어요</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-center">
+                        <button onclick="resetMixer()" class="px-8 py-3 bg-purple-500 hover:bg-purple-600 text-white text-lg font-bold rounded-full shadow-lg transition-all">
+                            🧹 마법 단지 비우기
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 하단 격려 메시지 바 -->
+            <div class="bg-amber-100 px-6 py-4 flex items-center justify-between border-t-4 border-amber-200">
+                <span id="footerMotto" class="text-lg text-amber-800 font-bold">✨ 잘한다, 잘한다! 끝까지 재미있게 놀아요!</span>
+                <span class="text-2xl">🌱</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 완료 축하 토스트 팝업 (성공 시 잠깐 보이고 사라짐) -->
+    <div id="successCelebration" class="hidden fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+        <div class="bg-yellow-100 border-4 border-yellow-400 p-8 rounded-[30px] shadow-2xl flex flex-col items-center justify-center animate-bounce max-w-sm pointer-events-auto">
+            <span class="text-7xl">🎉</span>
+            <h3 class="text-3xl font-bold text-yellow-700 mt-4">참 잘했어요!</h3>
+            <p class="text-stone-600 text-lg mt-2 text-center font-medium">우리 아이, 정말 똑똑하고 대단해요! 최고!</p>
+            <button onclick="closeSuccessPop()" class="mt-4 px-6 py-2 bg-yellow-500 text-white font-bold rounded-full text-lg shadow-md">최고야! 👍</button>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="bg-amber-100/80 backdrop-blur text-center py-6 mt-12 border-t-4 border-amber-200 z-10">
+        <p class="text-lg text-amber-800 font-bold">🌱 꿈나무 유치원 안심 웹 교구실</p>
+        <p class="text-sm text-stone-500 mt-1">상업적 목적이 아닌 어린이들의 신나는 체험 학습을 위해 제작된 안전한 캔버스 놀이터입니다.</p>
+    </footer>
+
+    <script>
+        // Web Audio API 오디오 컨텍스트 레이지 로딩
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // 아이 눈높이에 맞는 효과음 재생용 신디사이저 함수
+        function playTone(frequency, noteName) {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle'; // 동글동글 부드러운 삼각파음 사용
+                osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+                
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                // 음이 부드럽게 감쇠하도록 처리
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch (e) {
+                console.log("오디오 재생 실패 (사용자 인터랙션 우선 필요):", e);
+            }
+        }
+
+        // 특정 성공 축하 이펙트 사운드
+        function playSuccessSound() {
+            const notes = [261.63, 329.63, 392.00, 523.25]; // 도-미-솔-도 아르페지오
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playTone(freq, '');
+                }, idx * 120);
+            });
+        }
+
+        // [도구 1] 동물 소리 효과음 모사
+        function playSynth(animal) {
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (animal === 'cat') {
+                // 고양이 우는 느낌: 주파수를 아래에서 위로 쓸어 올림 (피치 슬라이드)
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } else if (animal === 'dog') {
+                // 바둑이 왈왈: 짧고 굵은 주파수 2번 반복
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+                // 왈! 추가
+                setTimeout(() => {
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.connect(gain2); gain2.connect(ctx.destination);
+                    osc2.frequency.setValueAtTime(200, ctx.currentTime);
+                    gain2.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc2.start();
+                    osc2.stop(ctx.currentTime + 0.2);
+                }, 150);
+            } else if (animal === 'frog') {
+                // 개구리 개골: 지글지글 사각파 활용 개골개골
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(180, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } else if (animal === 'duck') {
+                // 오리 꽥꽥: 사인파 + 고주파 변형
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            }
+        }
+
+        // 교구 오픈 로직
+        function openTool(toolType) {
+            // 오디오 활성화용 트리거
+            getAudioContext();
+
+            const workspace = document.getElementById('toolWorkspace');
+            const container = document.getElementById('toolContainer');
+            
+            // 모든 교구 콘턴츠 초기 숨김
+            document.getElementById('rhythmPlayContent').classList.add('hidden');
+            document.getElementById('wordMatchContent').classList.add('hidden');
+            document.getElementById('acornCountContent').classList.add('hidden');
+            document.getElementById('colorMixerContent').classList.add('hidden');
+
+            workspace.classList.remove('hidden');
+
+            // 테마 스킨 맞추기
+            if (toolType === 'rhythm') {
+                container.className = "modal-active bg-white w-full max-w-3xl rounded-[35px] shadow-2xl overflow-hidden border-4 border-rose-300 flex flex-col";
+                document.getElementById('toolHeader').className = "px-6 py-4 flex items-center justify-between bg-rose-400 text-white border-b-4 border-rose-500";
+                document.getElementById('toolIcon').innerText = "🎵";
+                document.getElementById('toolTitle').innerText = "쿵짝쿵짝 리듬 놀이";
+                document.getElementById('rhythmPlayContent').classList.remove('hidden');
+            } else if (toolType === 'word') {
+                container.className = "modal-active bg-white w-full max-w-3xl rounded-[35px] shadow-2xl overflow-hidden border-4 border-amber-300 flex flex-col";
+                document.getElementById('toolHeader').className = "px-6 py-4 flex items-center justify-between bg-amber-400 text-white border-b-4 border-amber-500";
+                document.getElementById('toolIcon').innerText = "🦁";
+                document.getElementById('toolTitle').innerText = "동물 낱말 맞추기";
+                document.getElementById('wordMatchContent').classList.remove('hidden');
+                initWordGame();
+            } else if (toolType === 'acorn') {
+                container.className = "modal-active bg-white w-full max-w-3xl rounded-[35px] shadow-2xl overflow-hidden border-4 border-emerald-300 flex flex-col";
+                document.getElementById('toolHeader').className = "px-6 py-4 flex items-center justify-between bg-emerald-400 text-white border-b-4 border-emerald-500";
+                document.getElementById('toolIcon').innerText = "🐿️";
+                document.getElementById('toolTitle').innerText = "도토리 쏙쏙 세기";
+                document.getElementById('acornCountContent').classList.remove('hidden');
+                resetAcornGame();
+            } else if (toolType === 'color') {
+                container.className = "modal-active bg-white w-full max-w-3xl rounded-[35px] shadow-2xl overflow-hidden border-4 border-purple-300 flex flex-col";
+                document.getElementById('toolHeader').className = "px-6 py-4 flex items-center justify-between bg-purple-400 text-white border-b-4 border-purple-500";
+                document.getElementById('toolIcon').innerText = "🎨";
+                document.getElementById('toolTitle').innerText = "조물조물 색깔 믹서";
+                document.getElementById('colorMixerContent').classList.remove('hidden');
+                resetMixer();
+            }
+        }
+
+        // 교구 클로즈 로직
+        function closeTool() {
+            document.getElementById('toolWorkspace').classList.add('hidden');
+        }
+
+        // 낱말 맞추기 게임용 정보 풀
+        const animalPool = [
+            { id: 'tiger', emoji: '🐯', name: '호랑이' },
+            { id: 'monkey', emoji: '🐵', name: '원숭이' },
+            { id: 'pig', emoji: '🐷', name: '꿀돼지' },
+            { id: 'rabbit', emoji: '🐰', name: '토끼' },
+            { id: 'elephant', emoji: '🐘', name: '코끼리' },
+            { id: 'fox', emoji: '🦊', name: '여우야' }
+        ];
+
+        let selectedAnimalId = null;
+        let matchedPairs = 0;
+        let activePairs = []; // 현재 플레이어가 맞춰야 하는 3종의 쌍
+
+        function initWordGame() {
+            selectedAnimalId = null;
+            matchedPairs = 0;
+            document.getElementById('matchScoreText').innerText = "성공한 맞춤: 0 / 3";
+            document.getElementById('matchStatusArrow').innerText = "👉";
+            
+            // 풀에서 3마리를 무작위 선정
+            const shuffled = [...animalPool].sort(() => 0.5 - Math.random());
+            activePairs = shuffled.slice(0, 3);
+
+            // 이미지 카드와 낱말 카드 목록 무작위 셔플링 배치
+            const leftCards = [...activePairs].sort(() => 0.5 - Math.random());
+            const rightCards = [...activePairs].sort(() => 0.5 - Math.random());
+
+            const imageContainer = document.getElementById('imageCardsContainer');
+            const wordContainer = document.getElementById('wordCardsContainer');
+
+            imageContainer.innerHTML = '';
+            wordContainer.innerHTML = '';
+
+            // 이미지 패드 렌더링
+            leftCards.forEach(item => {
+                imageContainer.innerHTML += `
+                    <button id="img-${item.id}" onclick="selectImageCard('${item.id}')" class="w-24 h-24 md:w-32 md:h-32 bg-white hover:bg-amber-50 border-4 border-stone-200 hover:border-amber-400 rounded-3xl flex items-center justify-center text-5xl md:text-6xl shadow-md transition-all">
+                        ${item.emoji}
+                    </button>
+                `;
+            });
+
+            // 단어 패드 렌더링
+            rightCards.forEach(item => {
+                wordContainer.innerHTML += `
+                    <button id="word-${item.id}" onclick="selectWordCard('${item.id}')" class="w-24 h-24 md:w-32 md:h-32 bg-white hover:bg-amber-50 border-4 border-stone-200 hover:border-amber-400 rounded-3xl flex items-center justify-center text-2xl md:text-3xl font-black text-amber-800 shadow-md transition-all">
+                        ${item.name}
+                    </button>
+                `;
+            });
+        }
+
+        // 이미지 터치 시 활성화
+        function selectImageCard(id) {
+            playTone(400, ''); // 간단한 안내 핑 사운드
+            
+            // 기존 선택 초기화
+            activePairs.forEach(item => {
+                const el = document.getElementById(`img-${item.id}`);
+                if (el) el.classList.remove('border-amber-400', 'bg-amber-100/70', 'scale-105');
+            });
+
+            selectedAnimalId = id;
+            const target = document.getElementById(`img-${id}`);
+            target.classList.add('border-amber-400', 'bg-amber-100/70', 'scale-105');
+            document.getElementById('matchStatusArrow').innerText = "👉 글자 고르기";
+        }
+
+        // 낱말 터치 시 유효성 검사 및 정답 연출
+        function selectWordCard(id) {
+            if (!selectedAnimalId) {
+                // 이미지를 먼저 안 눌렀다면 팅팅 경고 피치
+                playTone(180, '');
+                document.getElementById('matchStatusArrow').innerText = "👈 그림 먼저!";
+                return;
+            }
+
+            if (selectedAnimalId === id) {
+                // ★ 정답 매칭 완료!
+                playTone(523.25, ''); // 신나는 사운드
+                
+                // 해당 요소들 비활성화 및 초록 완료처리
+                const imgEl = document.getElementById(`img-${id}`);
+                const wordEl = document.getElementById(`word-${id}`);
+                
+                imgEl.disabled = true;
+                wordEl.disabled = true;
+
+                imgEl.className = "w-24 h-24 md:w-32 md:h-32 bg-emerald-100 border-4 border-emerald-400 rounded-3xl flex items-center justify-center text-5xl md:text-6xl opacity-60 cursor-not-allowed";
+                wordEl.className = "w-24 h-24 md:w-32 md:h-32 bg-emerald-100 border-4 border-emerald-400 rounded-3xl flex items-center justify-center text-2xl md:text-3xl font-black text-emerald-800 opacity-60 cursor-not-allowed";
+
+                matchedPairs++;
+                document.getElementById('matchScoreText').innerText = `성공한 맞춤: ${matchedPairs} / 3`;
+                document.getElementById('matchStatusArrow').innerText = "짝짝짝! 👏";
+                selectedAnimalId = null;
+
+                // 3쌍 전부 클리어 시 참 잘했어요 모달 등장
+                if (matchedPairs === 3) {
+                    setTimeout(() => {
+                        triggerCelebration();
+                    }, 500);
+                }
+            } else {
+                // 틀린 조합 에러 사운드
+                playTone(130, '');
+                document.getElementById('matchStatusArrow').innerText = "❌ 아냐, 다시 생각해요";
+            }
+        }
+
+        let collectedAcornCount = 0;
+        let totalAcornsCount = 10;
+
+        function resetAcornGame() {
+            collectedAcornCount = 0;
+            document.getElementById('acornCounter').innerText = "0 개";
+            const container = document.getElementById('acornSpawnArea');
+            container.innerHTML = '';
+
+            // 도토리 10개 랜덤 좌표 배치
+            for (let i = 0; i < totalAcornsCount; i++) {
+                const left = Math.floor(Math.random() * 50) + 5; // 보드 넓이 대비 퍼센트 (안전반경)
+                const top = Math.floor(Math.random() * 55) + 5;
+                
+                // 도토리 엘리먼트 동적 렌더링
+                const acorn = document.createElement('div');
+                acorn.id = `acorn-${i}`;
+                acorn.className = "draggable absolute text-4xl select-none z-20 hover:scale-125 transition-transform duration-100 p-2 filter drop-shadow";
+                acorn.style.left = `${left}%`;
+                acorn.style.top = `${top}%`;
+                acorn.innerText = "🌰";
+
+                // 마우스 및 모바일 터치 이벤트 연결
+                makeElementDraggable(acorn);
+                container.appendChild(acorn);
+            }
+        }
+
+        // 도토리 모바일/데스크톱 연동 드래그 알고리즘
+        function makeElementDraggable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            elmnt.onmousedown = dragMouseDown;
+            elmnt.ontouchstart = dragTouchStart;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                getAudioContext(); // 사운드 바인딩
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function dragTouchStart(e) {
+                getAudioContext();
+                const touch = e.touches[0];
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                document.ontouchend = closeDragElement;
+                document.ontouchmove = elementTouchDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                updateElementPosition();
+            }
+
+            function elementTouchDrag(e) {
+                const touch = e.touches[0];
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                updateElementPosition();
+            }
+
+            function updateElementPosition() {
+                const board = document.getElementById('gameBoard');
+                const boardRect = board.getBoundingClientRect();
+                
+                // 경계선 이탈 방지 처리
+                let newLeft = elmnt.offsetLeft - pos1;
+                let newTop = elmnt.offsetTop - pos2;
+
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+                if (newLeft > boardRect.width - 45) newLeft = boardRect.width - 45;
+                if (newTop > boardRect.height - 45) newTop = boardRect.height - 45;
+
+                elmnt.style.left = newLeft + "px";
+                elmnt.style.top = newTop + "px";
+            }
+
+            function closeDragElement() {
+                // 입력 훅 해제
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.ontouchend = null;
+                document.ontouchmove = null;
+
+                // 드롭 영역 검사 (바구니 범위 체크)
+                checkDropSuccess(elmnt);
+            }
+        }
+
+        function checkDropSuccess(elmnt) {
+            const basket = document.getElementById('basketArea');
+            const board = document.getElementById('gameBoard');
+            
+            const bRect = basket.getBoundingClientRect();
+            const eRect = elmnt.getBoundingClientRect();
+
+            // 도토리가 바구니 영역 사각형과 중첩되는지 여부 측정
+            const buffer = 15; // 넉넉한 인지 버퍼
+            if (
+                eRect.right > bRect.left + buffer &&
+                eRect.left < bRect.right - buffer &&
+                eRect.bottom > bRect.top + buffer &&
+                eRect.top < bRect.bottom - buffer
+            ) {
+                // 골인 성공! 도토리 소멸시키며 바구니 수치 증가
+                elmnt.remove();
+                collectedAcornCount++;
+                document.getElementById('acornCounter').innerText = `${collectedAcornCount} 개`;
+                
+                // 도토리 퐁당 귀여운 고음 재생
+                playTone(392 + (collectedAcornCount * 40), '');
+
+                // 만약 모두 다 주웠다면 완료 피드백
+                if (collectedAcornCount === totalAcornsCount) {
+                    setTimeout(() => {
+                        triggerCelebration();
+                    }, 500);
+                }
+            }
+        }
+
+        let currentMixColors = [];
+
+        function addMixColor(color) {
+            if (currentMixColors.length >= 2) {
+                // 최대 2개의 색만 믹스 가능
+                playTone(180, '');
+                return;
+            }
+
+            playTone(280, ''); // 투하음
+            currentMixColors.push(color);
+            updateMixerVisuals();
+        }
+
+        function updateMixerVisuals() {
+            const flaskLiquid = document.getElementById('flaskLiquid');
+            const addedBubbles = document.getElementById('addedBubbles');
+            const mixResultName = document.getElementById('mixResultName');
+
+            // 방울 생성 및 액체 채우기
+            addedBubbles.innerHTML = '';
+            currentMixColors.forEach(color => {
+                let colorClass = 'bg-red-500';
+                if (color === 'yellow') colorClass = 'bg-yellow-400';
+                if (color === 'blue') colorClass = 'bg-blue-500';
+
+                addedBubbles.innerHTML += `<span class="w-8 h-8 rounded-full ${colorClass} shadow-md animate-pulse"></span>`;
+            });
+
+            // 물감 혼합 수치 및 조합식 파악
+            if (currentMixColors.length === 0) {
+                flaskLiquid.style.height = "15%";
+                flaskLiquid.style.backgroundColor = "#e2e8f0";
+                mixResultName.innerText = "텅 비었어요";
+                mixResultName.className = "text-2xl font-black text-gray-800 mt-1";
+            } else if (currentMixColors.length === 1) {
+                flaskLiquid.style.height = "50%";
+                const primary = currentMixColors[0];
+                if (primary === 'red') {
+                    flaskLiquid.style.backgroundColor = "#ef4444";
+                    mixResultName.innerText = "새빨간 물감 한 방울";
+                    mixResultName.className = "text-2xl font-black text-red-500 mt-1";
+                } else if (primary === 'yellow') {
+                    flaskLiquid.style.backgroundColor = "#facc15";
+                    mixResultName.innerText = "샛노란 물감 한 방울";
+                    mixResultName.className = "text-2xl font-black text-yellow-500 mt-1";
+                } else if (primary === 'blue') {
+                    flaskLiquid.style.backgroundColor = "#3b82f6";
+                    mixResultName.innerText = "새파란 물감 한 방울";
+                    mixResultName.className = "text-2xl font-black text-blue-500 mt-1";
+                }
+            } else if (currentMixColors.length === 2) {
+                flaskLiquid.style.height = "90%";
+                
+                // 정식 혼합 프로세스
+                const c1 = currentMixColors[0];
+                const c2 = currentMixColors[1];
+
+                if ((c1 === 'red' && c2 === 'yellow') || (c1 === 'yellow' && c2 === 'red')) {
+                    // 주황색
+                    flaskLiquid.style.backgroundColor = "#f97316";
+                    mixResultName.innerText = "상큼 달콤 주황색! 🍊";
+                    mixResultName.className = "text-3xl font-black text-orange-500 mt-1 animate-bounce";
+                    triggerCelebration();
+                } else if ((c1 === 'yellow' && c2 === 'blue') || (c1 === 'blue' && c2 === 'yellow')) {
+                    // 초록색
+                    flaskLiquid.style.backgroundColor = "#22c55e";
+                    mixResultName.innerText = "푸르스름 싱싱 초록색! 🌿";
+                    mixResultName.className = "text-3xl font-black text-green-500 mt-1 animate-bounce";
+                    triggerCelebration();
+                } else if ((c1 === 'red' && c2 === 'blue') || (c1 === 'blue' && c2 === 'red')) {
+                    // 보라색
+                    flaskLiquid.style.backgroundColor = "#a855f7";
+                    mixResultName.innerText = "마법 같은 보라색! 🍇";
+                    mixResultName.className = "text-3xl font-black text-purple-600 mt-1 animate-bounce";
+                    triggerCelebration();
+                } else {
+                    // 같은 색상 두 번 주입 시 진해진 결과
+                    flaskLiquid.style.backgroundColor = c1 === 'red' ? '#b91c1c' : (c1 === 'yellow' ? '#eab308' : '#1d4ed8');
+                    mixResultName.innerText = "한층 더 엄청나게 진한 색!";
+                    mixResultName.className = "text-2xl font-black text-stone-700 mt-1";
+                }
+            }
+        }
+
+        function resetMixer() {
+            playTone(320, '');
+            currentMixColors = [];
+            updateMixerVisuals();
+        }
+
+        // 미니 성공 축하 팝업 작동기
+        function triggerCelebration() {
+            playSuccessSound();
+            const pop = document.getElementById('successCelebration');
+            pop.classList.remove('hidden');
+        }
+
+        function closeSuccessPop() {
+            document.getElementById('successCelebration').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
