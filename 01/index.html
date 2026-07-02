@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알록달록 숨은 그림 찾기 놀이터</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Gaegu', 'Noto Sans KR', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .comic-border {
+            border: 4px solid #1e293b;
+            box-shadow: 6px 6px 0px #1e293b;
+        }
+        .comic-shadow-sm {
+            box-shadow: 3px 3px 0px #1e293b;
+        }
+        .comic-btn {
+            transition: all 0.1s ease-in-out;
+        }
+        .comic-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0px #1e293b;
+        }
+        /* 화면 진동 효과 (오답 시) */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .shake-animation {
+            animation: shake 0.2s ease-in-out 2;
+        }
+        /* 물방울/성공 축하 팝업 애니메이션 */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-animation {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- 상단 든든한 헤더 바 -->
+    <header class="bg-amber-100 p-4 border-b-4 border-slate-800 sticky top-0 z-40 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center space-x-3">
+            <span class="text-4xl animate-bounce">🔍</span>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 leading-none">숨은 그림 찾기 놀이터</h1>
+                <p class="text-xs sm:text-sm text-amber-800 font-bold mt-1">얘들아! 꼭꼭 숨은 그림들이 어디 있을까? 모두 찾아보자!</p>
+            </div>
+        </div>
+        
+        <!-- 타이머 및 컨트롤 영역 -->
+        <div class="flex items-center space-x-4">
+            <!-- 1분 타이머 바 -->
+            <div class="bg-white border-3 border-slate-800 rounded-full p-1.5 flex items-center space-x-2 w-48 sm:w-56 comic-shadow-sm">
+                <span class="text-xl">⏱️</span>
+                <div class="flex-grow bg-slate-100 rounded-full h-4 overflow-hidden relative border border-slate-300">
+                    <div id="timerBar" class="bg-teal-400 h-full w-full transition-all duration-1000"></div>
+                </div>
+                <span id="timerText" class="font-bold text-lg text-slate-800 min-w-[32px] text-center">60</span>
+            </div>
+            
+            <!-- 다시하기 버튼 -->
+            <button onclick="resetGame()" class="bg-rose-400 hover:bg-rose-300 text-slate-800 font-bold py-2 px-4 rounded-full border-3 border-slate-800 comic-shadow-sm comic-btn text-md">
+                🔄 새 게임
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 놀이공간 -->
+    <main class="flex-grow p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- 왼쪽: 3가지 테마 선택 탭 및 놀이 칠판 (Lg: 9 cols) -->
+        <div class="lg:col-span-9 space-y-4 w-full">
+            
+            <!-- 테마 스위치 탭 -->
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="changeTheme(0)" id="theme-btn-0" class="theme-tab bg-teal-300 text-slate-800 font-black py-2.5 rounded-2xl border-3 border-slate-800 comic-shadow-sm text-lg sm:text-xl transition-all flex items-center justify-center space-x-2">
+                    <span>🌊</span> <span class="hidden sm:inline">바닷속 모험</span>
+                </button>
+                <button onclick="changeTheme(1)" id="theme-btn-1" class="theme-tab bg-white text-slate-800 font-black py-2.5 rounded-2xl border-3 border-slate-800 comic-shadow-sm text-lg sm:text-xl transition-all flex items-center justify-center space-x-2">
+                    <span>🌳</span> <span class="hidden sm:inline">요정의 숲</span>
+                </button>
+                <button onclick="changeTheme(2)" id="theme-btn-2" class="theme-tab bg-white text-slate-800 font-black py-2.5 rounded-2xl border-3 border-slate-800 comic-shadow-sm text-lg sm:text-xl transition-all flex items-center justify-center space-x-2">
+                    <span>🚀</span> <span class="hidden sm:inline">우주 여행</span>
+                </button>
+            </div>
+
+            <!-- 메인 게임 보드 영역 -->
+            <div id="gameBoardContainer" class="relative w-full aspect-[4/3] bg-gradient-to-b from-sky-400 to-blue-600 rounded-3xl border-4 border-slate-800 overflow-hidden comic-shadow cursor-crosshair">
+                
+                <!-- 테마별 배경 레이어 (바람, 물결, 별자리 등 꾸밈) -->
+                <div id="boardDecorations" class="absolute inset-0 pointer-events-none z-0">
+                    <!-- JS로 테마 변경 시 동적 렌더링 -->
+                </div>
+
+                <!-- 실시간으로 동그라미가 그려지는 타겟 및 방해요소 배치 레이어 -->
+                <div id="boardPlayground" class="absolute inset-0 z-10" onclick="handleBoardClick(event)">
+                    <!-- 수많은 방해 요소와 정답 요소들이 렌더링 됨 -->
+                </div>
+
+                <!-- 정답 동그라미 레이어 -->
+                <div id="boardCircles" class="absolute inset-0 pointer-events-none z-20">
+                    <!-- 정답 클릭 시 여기에 빨간색 동그라미 마커 배치 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 찾아야 하는 든든한 힌트 판넬 (Lg: 3 cols) -->
+        <div class="lg:col-span-3 space-y-4 w-full">
+            <div class="bg-amber-50 border-4 border-slate-800 rounded-3xl p-5 comic-shadow">
+                <div class="text-center border-b-3 border-slate-800 pb-3 mb-4">
+                    <span class="text-xl font-bold text-amber-950 block">🕵️ 찾아야 할 그림</span>
+                    <p class="text-xs text-amber-800 font-bold">다 찾으면 보물이 열려요!</p>
+                </div>
+                
+                <!-- 찾을 아이템 리스트 세로 배치 -->
+                <div id="targetListContainer" class="space-y-3">
+                    <!-- JS 동적 생성 -->
+                </div>
+            </div>
+
+            <!-- 선생님 가이드 박스 -->
+            <div class="bg-violet-50 border-4 border-slate-800 rounded-3xl p-4 comic-shadow">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-2xl">👩‍🏫</span>
+                    <h3 class="text-lg font-bold text-slate-800">선생님 수업 가이드</h3>
+                </div>
+                <ul class="text-xs text-slate-700 font-bold space-y-2 leading-relaxed">
+                    <li>💡 스마트 보드에서 원아들을 한 명씩 불러 번갈아가며 찾아보게 하면 협동심 발달에 뛰어납니다.</li>
+                    <li>💡 "물고기 옆에 숨은 노란색 불가사리는 어디 있을까?" 처럼 위치 어휘를 사용해 힌트를 유도해 주세요.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- 게임 결과 오버레이 (성공 / 실패) -->
+    <div id="gameModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 pointer-events-none">
+        <div class="bg-white border-4 border-slate-800 p-8 rounded-3xl max-w-md w-full text-center comic-border pop-animation relative">
+            <div id="modalEmoji" class="text-8xl mb-4 animate-bounce">🎉</div>
+            <h2 id="modalTitle" class="text-3xl font-black text-slate-800 mb-2">미션 대성공!</h2>
+            <p id="modalDescription" class="text-lg font-bold text-slate-600 mb-6">모든 그림을 전부 찾아냈어요. 최고예요!</p>
+            
+            <button onclick="resetGame()" class="w-full bg-teal-400 hover:bg-teal-300 text-slate-800 font-bold py-3 rounded-2xl border-3 border-slate-800 comic-shadow-sm comic-btn text-xl">
+                다시 시작하기 🎮
+            </button>
+        </div>
+    </div>
+
+    <!-- 하단 라이선스 및 광고 없는 안심 바 -->
+    <footer class="bg-slate-800 text-slate-400 p-3 text-center border-t-4 border-slate-900 text-xs sm:text-sm font-bold mt-6">
+        <div class="flex justify-center items-center space-x-3 text-amber-400 mb-1">
+            <span>🛡️ 광고 없음</span>
+            <span>•</span>
+            <span>🔒 개인정보 없음</span>
+            <span>•</span>
+            <span>🧸 안전한 어린이 공간</span>
+        </div>
+        <p>© 2026 유치원 숨은 그림 찾기 놀이터. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // ------------------ 테마 및 데이터 모델 정의 ------------------
+        const themes = [
+            {
+                name: "바닷속 모험",
+                bgGradient: "from-sky-400 via-blue-500 to-indigo-800",
+                decorations: [
+                    { emoji: "🌿", x: 10, y: 85, size: "text-6xl", rot: 15, opacity: "opacity-60" },
+                    { emoji: "🌿", x: 90, y: 80, size: "text-7xl", rot: -10, opacity: "opacity-60" },
+                    { emoji: "🪸", x: 30, y: 88, size: "text-5xl", rot: 5, opacity: "opacity-80" },
+                    { emoji: "🪸", x: 70, y: 90, size: "text-5xl", rot: -20, opacity: "opacity-80" },
+                    { emoji: "🐟", x: 25, y: 20, size: "text-2xl", rot: 10, opacity: "opacity-40" },
+                    { emoji: "🐠", x: 60, y: 15, size: "text-3xl", rot: -15, opacity: "opacity-40" },
+                    { emoji: "🐡", x: 80, y: 35, size: "text-4xl", rot: 5, opacity: "opacity-30" },
+                    { emoji: "🐳", x: 45, y: 40, size: "text-8xl", rot: 0, opacity: "opacity-15" },
+                    { emoji: "🫧", x: 15, y: 50, size: "text-xl", rot: 0, opacity: "opacity-70" },
+                    { emoji: "🫧", x: 18, y: 30, size: "text-2xl", rot: 0, opacity: "opacity-50" },
+                    { emoji: "🫧", x: 75, y: 60, size: "text-xl", rot: 0, opacity: "opacity-70" },
+                    { emoji: "🫧", x: 78, y: 45, size: "text-3xl", rot: 0, opacity: "opacity-60" }
+                ],
+                // 원아들이 헷갈리도록 화면 곳곳에 배치되는 방해 요소들 (이모지 및 크기, 좌표)
+                distractors: [
+                    { emoji: "🐠", x: 12, y: 25, rot: 45, size: "text-3xl" },
+                    { emoji: "🐟", x: 50, y: 80, rot: -30, size: "text-2xl" },
+                    { emoji: "🐡", x: 88, y: 12, rot: 15, size: "text-3xl" },
+                    { emoji: "🦑", x: 40, y: 10, rot: 180, size: "text-4xl" },
+                    { emoji: "🐬", x: 75, y: 75, rot: 25, size: "text-5xl" },
+                    { emoji: "🌊", x: 5, y: 8, rot: 0, size: "text-3xl" },
+                    { emoji: "🦈", x: 85, y: 55, rot: -10, size: "text-6xl" },
+                    { emoji: "🦐", x: 22, y: 72, rot: 90, size: "text-3xl" },
+                    { emoji: "🚢", x: 8, y: 50, rot: -15, size: "text-4xl" }
+                ],
+                // 찾아야 하는 실제 타겟 리스트 (좌표는 백분율 % 기준)
+                targets: [
+                    { id: "starfish", emoji: "🌟", name: "불가사리", x: 30, y: 60, found: false, hint: "모래사장 근처에 반짝이고 있어요!" },
+                    { id: "crab", emoji: "🦀", name: "빨간 꽃게", x: 82, y: 88, found: false, hint: "구석 풀숲 아래에서 옆으로 걷고 있어요." },
+                    { id: "octopus", emoji: "🐙", name: "동글 문어", x: 15, y: 35, found: false, hint: "바위 옆에서 다리를 꼼지락거려요." },
+                    { id: "shell", emoji: "🐚", name: "진주 소라", x: 62, y: 82, found: false, hint: "오른쪽 해초 근처 바닥에 누워 있어요." },
+                    { id: "crown", emoji: "👑", name: "잃어버린 왕관", x: 48, y: 28, found: false, hint: "바닷속 물속 중앙에서 반짝거려요." },
+                    { id: "key", emoji: "🔑", name: "황금 열쇠", x: 88, y: 30, found: false, hint: "오른쪽 하늘하늘한 물결 위쪽에 있어요." }
+                ]
+            },
+            {
+                name: "요정의 숲",
+                bgGradient: "from-emerald-400 via-green-500 to-teal-800",
+                decorations: [
+                    { emoji: "🌳", x: 5, y: 30, size: "text-8xl", rot: 0, opacity: "opacity-40" },
+                    { emoji: "🌲", x: 85, y: 25, size: "text-8xl", rot: 0, opacity: "opacity-40" },
+                    { emoji: "🪨", x: 12, y: 85, size: "text-5xl", rot: 0, opacity: "opacity-80" },
+                    { emoji: "🪨", x: 78, y: 88, size: "text-4xl", rot: 20, opacity: "opacity-80" },
+                    { emoji: "🍂", x: 40, y: 85, size: "text-3xl", rot: 45, opacity: "opacity-60" },
+                    { emoji: "🍁", x: 60, y: 90, size: "text-3xl", rot: -30, opacity: "opacity-60" },
+                    { emoji: "🪵", x: 50, y: 82, size: "text-5xl", rot: 10, opacity: "opacity-70" },
+                    { emoji: "☁️", x: 20, y: 10, size: "text-4xl", rot: 0, opacity: "opacity-30" },
+                    { emoji: "☁️", x: 70, y: 15, size: "text-5xl", rot: 0, opacity: "opacity-30" }
+                ],
+                distractors: [
+                    { emoji: "🌻", x: 25, y: 78, rot: 15, size: "text-4xl" },
+                    { emoji: "🐝", x: 45, y: 25, rot: -45, size: "text-3xl" },
+                    { emoji: "🐞", x: 8, y: 65, rot: 120, size: "text-3xl" },
+                    { emoji: "🐜", x: 62, y: 82, rot: 0, size: "text-2xl" },
+                    { emoji: "🐰", x: 88, y: 65, rot: 5, size: "text-4xl" },
+                    { emoji: "🐛", x: 35, y: 88, rot: 90, size: "text-3xl" },
+                    { emoji: "🦔", x: 18, y: 86, rot: -10, size: "text-4xl" },
+                    { emoji: "🐌", x: 72, y: 55, rot: 15, size: "text-3xl" }
+                ],
+                targets: [
+                    { id: "acorn", emoji: "🌰", name: "튼튼 도토리", x: 32, y: 55, found: false, hint: "들판 왼쪽 나무 아래에 떨어져 있어요." },
+                    { id: "owl", emoji: "🦉", name: "지혜 올빼미", x: 10, y: 15, found: false, hint: "왼쪽 큰 나뭇가지 위에 앉아 있어요." },
+                    { id: "butterfly", emoji: "🦋", name: "파란 나비", x: 52, y: 18, found: false, hint: "하늘 중앙에서 나풀나풀 날아다녀요." },
+                    { id: "ladybug", emoji: "🐞", name: "무당벌레", x: 82, y: 48, found: false, hint: "오른쪽 나무 기둥에 꼭 붙어 있어요." },
+                    { id: "frog", emoji: "🐸", name: "초록 개구리", x: 52, y: 72, found: false, hint: "가운데 통나무 옆에서 폴짝 뛸 준비를 해요." },
+                    { id: "mushroom", emoji: "🍄", name: "꼬마 버섯", x: 72, y: 80, found: false, hint: "오른쪽 큰 바위 뒤에 쏙 숨어 있어요." }
+                ]
+            },
+            {
+                name: "우주 여행",
+                bgGradient: "from-slate-900 via-purple-900 to-indigo-950",
+                decorations: [
+                    { emoji: "🪐", x: 15, y: 20, size: "text-7xl", rot: -15, opacity: "opacity-45" },
+                    { emoji: "🌍", x: 82, y: 75, size: "text-8xl", rot: 10, opacity: "opacity-35" },
+                    { emoji: "☄️", x: 45, y: 12, size: "text-4xl", rot: 120, opacity: "opacity-60" },
+                    { emoji: "✨", x: 10, y: 50, size: "text-2xl", rot: 0, opacity: "opacity-50" },
+                    { emoji: "✨", x: 90, y: 20, size: "text-xl", rot: 45, opacity: "opacity-50" },
+                    { emoji: "✨", x: 50, y: 85, size: "text-2xl", rot: 15, opacity: "opacity-40" },
+                    { emoji: "🛰️", x: 75, y: 18, size: "text-5xl", rot: -45, opacity: "opacity-30" },
+                    { emoji: "🌌", x: 35, y: 50, size: "text-9xl", rot: 0, opacity: "opacity-10" }
+                ],
+                distractors: [
+                    { emoji: "🌙", x: 8, y: 82, rot: 15, size: "text-5xl" },
+                    { emoji: "⭐", x: 28, y: 12, rot: 35, size: "text-2xl" },
+                    { emoji: "⭐", x: 62, y: 42, rot: -20, size: "text-2xl" },
+                    { emoji: "☀️", x: 88, y: 10, rot: 0, size: "text-6xl" },
+                    { emoji: "🛸", x: 32, y: 78, rot: 10, size: "text-4xl" },
+                    { emoji: "🔭", x: 65, y: 85, rot: -30, size: "text-4xl" },
+                    { emoji: "☄️", x: 12, y: 62, rot: 200, size: "text-3xl" },
+                    { emoji: "👾", x: 85, y: 45, rot: 5, size: "text-4xl" }
+                ],
+                targets: [
+                    { id: "ufo", emoji: "🛸", name: "우주선 UFO", x: 48, y: 28, found: false, hint: "우주 한가운데를 날아다니고 있어요." },
+                    { id: "alien", emoji: "👽", name: "아기 외계인", x: 22, y: 52, found: false, hint: "왼쪽 우주먼지 사이로 고개를 쏙 내밀었어요." },
+                    { id: "saturn", emoji: "🪐", name: "꼬마 토성", x: 75, y: 52, found: false, hint: "오른쪽 하늘에서 고리를 뽐내고 있답니다." },
+                    { id: "astronaut", emoji: "👩‍🚀", name: "우주 비행사", x: 55, y: 68, found: false, hint: "우주선 아래쪽에서 둥둥 수영하고 있어요." },
+                    { id: "rocket", emoji: "🚀", name: "꼬마 로켓", x: 12, y: 25, found: false, hint: "왼쪽 위 은하계 옆에서 힘차게 가고 있어요." },
+                    { id: "star", emoji: "⭐", name: "노란 왕별", x: 88, y: 28, found: false, hint: "우측 상단 인공위성 밑에서 빛나요." }
+                ]
+            }
+        ];
+
+        // ------------------ 게임 상태 제어 변수 ------------------
+        let activeThemeIndex = 0;
+        let timeLeft = 60; // 1분 설정
+        let timerInterval = null;
+        let gameActive = true;
+        let audioCtx = null;
+
+        // ------------------ Web Audio API 효과음 생성 ------------------
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // 기분 좋은 '딩동댕' 높은 화음
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+
+                    setTimeout(() => {
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+                        gain2.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                        osc2.start();
+                        osc2.stop(audioCtx.currentTime + 0.4);
+                    }, 80);
+                } else if (type === 'wrong') {
+                    // 낮고 짧은 '뿡' 소리 (오답)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    // 대성공 멜로디
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        setTimeout(() => {
+                            const o = audioCtx.createOscillator();
+                            const g = audioCtx.createGain();
+                            o.connect(g);
+                            g.connect(audioCtx.destination);
+                            o.type = 'sine';
+                            o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                            o.start();
+                            o.stop(audioCtx.currentTime + 0.4);
+                        }, idx * 100);
+                    });
+                } else if (type === 'lose') {
+                    // 시간 초과 아쉬운 슬라이딩 다운 소리
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.8);
+                } else if (type === 'click') {
+                    // 가벼운 버튼 클릭 사운드
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch (e) {
+                // 브라우저에서 오디오 정책 차단 혹은 미지원 시 조용히 스킵
+            }
+        }
+
+        // ------------------ 초기화 및 게임 로딩 ------------------
+        window.onload = function() {
+            loadTheme(0);
+            startTimer();
+        };
+
+        // 테마 로드 및 게임 리셋
+        function loadTheme(themeIndex) {
+            activeThemeIndex = themeIndex;
+            const theme = themes[themeIndex];
+            
+            // 탭 버튼 스타일 업데이트
+            document.querySelectorAll('.theme-tab').forEach((btn, idx) => {
+                if (idx === themeIndex) {
+                    btn.classList.add('bg-amber-400', 'scale-105');
+                    btn.classList.remove('bg-white');
+                } else {
+                    btn.classList.add('bg-white');
+                    btn.classList.remove('bg-amber-400', 'scale-105');
+                }
+            });
+
+            // 배경 그라데이션 적용
+            const board = document.getElementById('gameBoardContainer');
+            board.className = `relative w-full aspect-[4/3] bg-gradient-to-b ${theme.bgGradient} rounded-3xl border-4 border-slate-800 overflow-hidden comic-shadow cursor-crosshair`;
+
+            // 타겟 상태 리셋
+            theme.targets.forEach(t => t.found = false);
+
+            // 동적 렌더링
+            renderDecorations(theme);
+            renderPlayground(theme);
+            renderTargetList(theme);
+            
+            // 기존 서클 다 제거
+            document.getElementById('boardCircles').innerHTML = '';
+        }
+
+        // 테마 변경용 이벤트 리스너
+        function changeTheme(themeIndex) {
+            playSound('click');
+            loadTheme(themeIndex);
+            resetTimer();
+            gameActive = true;
+        }
+
+        // ------------------ 렌더링 세부 구현 ------------------
+
+        // 1. 테마별 배경 장식요소 배치
+        function renderDecorations(theme) {
+            const container = document.getElementById('boardDecorations');
+            container.innerHTML = '';
+            theme.decorations.forEach(dec => {
+                const el = document.createElement('div');
+                el.className = `absolute ${dec.size} ${dec.opacity} pointer-events-none select-none`;
+                el.style.left = `${dec.x}%`;
+                el.style.top = `${dec.y}%`;
+                el.style.transform = `translate(-50%, -50%) rotate(${dec.rot || 0}deg)`;
+                el.innerText = dec.emoji;
+                container.appendChild(el);
+            });
+        }
+
+        // 2. 플레이그라운드 (타겟 + 훼방꾼 이모지 배치)
+        function renderPlayground(theme) {
+            const container = document.getElementById('boardPlayground');
+            container.innerHTML = '';
+
+            // 방해물 추가
+            theme.distractors.forEach((dist, idx) => {
+                const el = document.createElement('div');
+                el.className = `absolute ${dist.size} select-none cursor-pointer filter hover:scale-110 active:scale-90 transition-transform duration-75`;
+                el.style.left = `${dist.x}%`;
+                el.style.top = `${dist.y}%`;
+                el.style.transform = `translate(-50%, -50%) rotate(${dist.rot || 0}deg)`;
+                el.innerText = dist.emoji;
+                // 방해 이모지를 누르면 팅김과 동시에 감점 없이 아쉬운 피드백 전파
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    triggerWrongClick();
+                };
+                container.appendChild(el);
+            });
+
+            // 실제 숨겨진 타겟들 추가
+            theme.targets.forEach((target) => {
+                const el = document.createElement('div');
+                el.id = `target-element-${target.id}`;
+                // 아이들이 찾기 쉽도록 약간의 미세한 크기 변주 및 불투명도 조절로 '숨겨짐' 묘사
+                el.className = "absolute text-4xl sm:text-5xl select-none cursor-pointer filter saturate-100 hover:scale-125 transition-all duration-100 ease-out p-2 active:scale-95";
+                el.style.left = `${target.x}%`;
+                el.style.top = `${target.y}%`;
+                el.style.transform = `translate(-50%, -50%)`;
+                el.innerText = target.emoji;
+                
+                // 타겟 단독 클릭 이벤트
+                el.onclick = (e) => {
+                    e.stopPropagation(); // 배경 오답 클릭 전파 차단
+                    clickTarget(target);
+                };
+
+                container.appendChild(el);
+            });
+        }
+
+        // 3. 우측 찾아야 할 그림 힌트 리스트 렌더링
+        function renderTargetList(theme) {
+            const container = document.getElementById('targetListContainer');
+            container.innerHTML = '';
+
+            theme.targets.forEach(target => {
+                const card = document.createElement('div');
+                card.id = `target-card-${target.id}`;
+                card.className = "flex items-center space-x-3 bg-white border-3 border-slate-800 p-2.5 rounded-2xl comic-shadow-sm transition-all duration-300";
+                
+                card.innerHTML = `
+                    <div id="target-icon-box-${target.id}" class="w-12 h-12 bg-slate-100 rounded-xl border-2 border-slate-300 flex items-center justify-center text-3xl transition-transform">
+                        ${target.emoji}
+                    </div>
+                    <div class="flex-grow">
+                        <span id="target-title-${target.id}" class="text-md font-black text-slate-800">${target.name}</span>
+                        <p class="text-[11px] text-slate-500 font-bold leading-tight mt-0.5">${target.hint}</p>
+                    </div>
+                    <div id="target-check-${target.id}" class="text-2xl text-slate-300">
+                        ⬜
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ------------------ 인게임 매커니즘 ------------------
+
+        // 타겟 클릭 처리 (성공)
+        function clickTarget(target) {
+            if (!gameActive || target.found) return;
+
+            target.found = true;
+            playSound('correct');
+
+            // 1. 빨간 동그라미 치기 (질문 사양: "찾아서 클릭하면 동그라미를 쳐서 표시해주세요.")
+            const circleLayer = document.getElementById('boardCircles');
+            const circle = document.createElement('div');
+            circle.className = "absolute border-4 border-rose-500 rounded-full animate-ping-once flex items-center justify-center";
+            circle.style.width = "64px";
+            circle.style.height = "64px";
+            circle.style.left = `calc(${target.x}% - 32px)`;
+            circle.style.top = `calc(${target.y}% - 32px)`;
+            // 안쪽에 기여운 추가 링 형성
+            circle.innerHTML = `<div class="w-full h-full border-2 border-dashed border-rose-400 rounded-full"></div>`;
+            circleLayer.appendChild(circle);
+
+            // 해당 이모지 애니메이션 축하
+            const targetEl = document.getElementById(`target-element-${target.id}`);
+            if (targetEl) {
+                targetEl.classList.add('animate-bounce', 'scale-125', 'pointer-events-none');
+            }
+
+            // 2. 우측 미션 패널 체크 완료 처리
+            const card = document.getElementById(`target-card-${target.id}`);
+            const iconBox = document.getElementById(`target-icon-box-${target.id}`);
+            const title = document.getElementById(`target-title-${target.id}`);
+            const checkBox = document.getElementById(`target-check-${target.id}`);
+
+            if (card) {
+                card.classList.add('bg-emerald-50', 'border-emerald-500');
+                card.classList.remove('bg-white', 'border-slate-800');
+                iconBox.className = "w-12 h-12 bg-emerald-100 rounded-xl border-2 border-emerald-400 flex items-center justify-center text-3xl transform rotate-12";
+                title.className = "text-md font-black text-emerald-800 line-through";
+                checkBox.innerText = "❤️";
+            }
+
+            // 간단 알림 토스트 출력
+            showFloatingText(`찾았다! ${target.name} ${target.emoji}`, target.x, target.y);
+
+            // 3. 모든 보물 클리어 달성 여부 판단
+            checkWinCondition();
+        }
+
+        // 배경 클릭 시 오답 진동 및 오답음
+        function handleBoardClick(event) {
+            // 다른 요소 클릭이 아닐 때만 발동
+            if (event.target.id === 'boardPlayground') {
+                triggerWrongClick();
+            }
+        }
+
+        // 오답 리액션 실행
+        function triggerWrongClick() {
+            if (!gameActive) return;
+            playSound('wrong');
+            
+            // 보드 전체 흔들기
+            const board = document.getElementById('gameBoardContainer');
+            board.classList.remove('shake-animation');
+            void board.offsetWidth; // 리플로우 유발로 애니메이션 재시작 허용
+            board.classList.add('shake-animation');
+
+            // 하단에 살짝 경고 띄우기
+            showToastMessage("⚠️ 아쉽다! 여기에 없어요. 다른 곳을 다시 찾아보세요!");
+        }
+
+        // 칠판 위 공중에 뜨는 다이내믹 텍스트 효과
+        function showFloatingText(text, x, y) {
+            const container = document.getElementById('boardPlayground');
+            const floating = document.createElement('div');
+            floating.className = "absolute text-white bg-slate-900/80 font-black px-3 py-1.5 rounded-full text-sm border-2 border-white pointer-events-none z-30 animate-bounce transition-all duration-1000";
+            floating.style.left = `${x}%`;
+            floating.style.top = `${y - 12}%`;
+            floating.style.transform = "translateX(-50%)";
+            floating.innerText = text;
+            container.appendChild(floating);
+
+            setTimeout(() => {
+                floating.style.opacity = '0';
+                floating.style.top = `${y - 25}%`;
+                setTimeout(() => floating.remove(), 1000);
+            }, 800);
+        }
+
+        // ------------------ 승리/패배 게임 오버 조건 ------------------
+
+        function checkWinCondition() {
+            const currentTheme = themes[activeThemeIndex];
+            const isAllFound = currentTheme.targets.every(t => t.found);
+
+            if (isAllFound) {
+                gameActive = false;
+                clearInterval(timerInterval);
+                playSound('win');
+                showModal("👑 미션 클리어!", "우와! 모든 그림을 전부 찾았어요. 역시 우리 친구들 최고예요! 🎉", "🎉");
+            }
+        }
+
+        function triggerGameOver() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            playSound('lose');
+            showModal("⏰ 시간이 끝났어요!", "아쉽게도 시간이 다 흘렀어요. 선생님과 함께 한 번 더 도전해 볼까요? 🧸", "🦁");
+        }
+
+        // ------------------ 타이머 관리 ------------------
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0 && gameActive) {
+                    timeLeft--;
+                    updateTimerUI();
+                } else if (timeLeft <= 0 && gameActive) {
+                    triggerGameOver();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const bar = document.getElementById('timerBar');
+            const text = document.getElementById('timerText');
+            
+            text.innerText = timeLeft;
+            const percentage = (timeLeft / 60) * 100;
+            bar.style.width = `${percentage}%`;
+
+            // 남은 시간에 따른 친근한 색상 변화 안내 (원아용 시인성 고려)
+            if (timeLeft > 30) {
+                bar.className = "bg-teal-400 h-full transition-all duration-1000";
+            } else if (timeLeft > 15) {
+                bar.className = "bg-amber-400 h-full transition-all duration-1000 animate-pulse";
+            } else {
+                bar.className = "bg-rose-500 h-full transition-all duration-1000 animate-pulse";
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            updateTimerUI();
+            startTimer();
+        }
+
+        // 게임 완전 전체 리셋
+        function resetGame() {
+            playSound('click');
+            loadTheme(activeThemeIndex);
+            resetTimer();
+            gameActive = true;
+            hideModal();
+        }
+
+        // ------------------ 모달 및 알림 창 안내 ------------------
+        function showModal(title, desc, emoji) {
+            const modal = document.getElementById('gameModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDescription').innerText = desc;
+            document.getElementById('modalEmoji').innerText = emoji;
+
+            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('gameModal');
+            modal.classList.add('hidden', 'opacity-0', 'pointer-events-none');
+            modal.classList.remove('flex', 'opacity-100');
+        }
+
+        // 화면 하단 토스트 문구
+        function showToastMessage(msg) {
+            const toast = document.getElementById('toast-message');
+            const text = document.getElementById('toast-text');
+            text.innerText = msg;
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('opacity-100');
+            }, 2500);
+        }
+    </script>
+
+    <!-- 안심 알림창 (Toast) -->
+    <div id="toast-message" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/90 text-white font-bold py-3 px-6 rounded-full border-2 border-white comic-shadow-sm opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center space-x-2">
+        <span id="toast-text">알림 내용</span>
+    </div>
+
+</body>
+</html>
